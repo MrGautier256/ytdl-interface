@@ -1,0 +1,22 @@
+# Binaires téléchargés automatiquement au premier lancement (yt-dlp.exe, ffmpeg.exe...)
+bin/
+
+# Réglages et fichiers générés par l'application (contiennent des chemins locaux)
+settings.json
+archive.txt
+error.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Build (PyInstaller, etc.) — ytdl-interface.spec est suivi volontairement, il pilote la CI
+build/
+dist/
+
+# Éditeurs / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
