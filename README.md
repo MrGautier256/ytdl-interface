@@ -6,11 +6,11 @@ A full-featured graphical interface for [yt-dlp](https://github.com/yt-dlp/yt-dl
 
 ## Getting started
 
-**Ready-to-run build (recommended):** download the latest `YTDL-Interface.exe` from the [Releases](../../releases) page and run it. No install, no prerequisites.
+**Ready-to-run build (recommended):** download the latest `YTDL-Interface.zip` from the [Releases](../../releases) page, extract it anywhere, and run `YTDL-Interface.exe` inside the extracted folder. No install, no prerequisites.
 
 **From source:** double-click `main.pyw` (requires Python 3 with Tkinter, included by default on Windows).
 
-Either way, if yt-dlp and/or ffmpeg are missing on the machine, the app detects it on startup and offers an install window with a per-component progress bar; installation runs in the background without closing the app. Also reachable any time from the Advanced tab ("Download yt-dlp" / "Install ffmpeg" / "Update yt-dlp"). Binaries are stored next to the executable (`bin/` folder), not in a system directory.
+Either way, if yt-dlp and/or ffmpeg are missing on the machine, the app detects it on startup and offers an install window with a per-component progress bar; installation runs in the background without closing the app. Also reachable any time from the Advanced tab ("Download yt-dlp" / "Install ffmpeg" / "Update yt-dlp"). Settings and binaries are stored inside that same folder (`settings.json`, `bin/`), next to the executable, not in a system directory — keep the whole folder together.
 
 ## Language and theme
 

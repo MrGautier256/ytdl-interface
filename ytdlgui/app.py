@@ -1023,7 +1023,10 @@ class App(tk.Tk):
 
         def close_dialog():
             self._install_win = None
-            win.destroy()
+            try:
+                win.destroy()
+            except tk.TclError:
+                pass  # déjà fermée (bouton cliqué avant la fermeture auto programmée)
 
         try:
             if failed:
@@ -1034,6 +1037,10 @@ class App(tk.Tk):
             win._cancel_btn.configure(text=T("inst.btn_close"), state="normal", command=close_dialog)
             win.protocol("WM_DELETE_WINDOW", close_dialog)
             win._install_btn.pack_forget()
+            if not failed:
+                # Tout a réussi : pas besoin d'un clic, on ferme tout seul après un
+                # court délai (le temps de laisser voir le message de succès).
+                win.after(1200, close_dialog)
         except tk.TclError:
             pass
         self._resolve_binaries()

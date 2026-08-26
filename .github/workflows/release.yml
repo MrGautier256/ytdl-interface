@@ -27,15 +27,18 @@ jobs:
       - name: Build exe
         run: pyinstaller --noconfirm --clean ytdl-interface.spec
 
+      - name: Zip the release folder
+        run: Compress-Archive -Path dist/YTDL-Interface -DestinationPath dist/YTDL-Interface.zip
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: YTDL-Interface-windows
-          path: dist/YTDL-Interface.exe
+          path: dist/YTDL-Interface.zip
 
       - name: Create GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/YTDL-Interface.exe
+          files: dist/YTDL-Interface.zip
           generate_release_notes: true
