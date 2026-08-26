@@ -8,6 +8,8 @@ Interface graphique complète pour [yt-dlp](https://github.com/yt-dlp/yt-dlp), l
 
 **Version prête à l'emploi (recommandé) :** téléchargez le dernier `YTDL-Interface.zip` depuis la page [Releases](../../releases), extrayez-le où vous voulez, puis lancez `YTDL-Interface.exe` dans le dossier extrait. Aucune installation, aucun prérequis.
 
+> **SmartScreen de Windows :** au premier lancement, Windows peut afficher "Windows a protégé votre ordinateur". Ça signifie simplement que l'exe est récent et non signé, pas encore reconnu comme fiable par le système de réputation de SmartScreen : ce n'est pas une détection de virus. Cliquez sur **Informations complémentaires** puis **Exécuter quand même**.
+
 **Depuis les sources :** double-cliquer sur `main.pyw` (nécessite Python 3, avec Tkinter, inclus par défaut sur Windows).
 
 Dans les deux cas, si yt-dlp et/ou ffmpeg sont absents de la machine, l'application le détecte au démarrage et propose une fenêtre d'installation avec barre de progression par composant ; l'installation se fait en arrière-plan, sans quitter l'app. Accessible aussi à tout moment depuis l'onglet Avancé ("Télécharger yt-dlp" / "Installer ffmpeg" / "Mettre à jour yt-dlp"). Les réglages et les binaires sont enregistrés dans ce même dossier (`settings.json`, `bin/`), à côté de l'exécutable, pas dans un dossier système : gardez le dossier entier ensemble.
