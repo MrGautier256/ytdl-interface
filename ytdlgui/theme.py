@@ -1,6 +1,7 @@
-"""Thèmes clair/sombre : détection Windows, application sv-ttk, palette tk."""
+"""Thèmes clair/sombre : détection système, application sv-ttk, palette tk."""
 import ctypes
 import os
+import subprocess
 import sys
 
 _VENDOR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "vendor")
@@ -20,16 +21,41 @@ DARK = dict(
 PAL = dict(LIGHT)   # palette courante, mise à jour par apply()
 CURRENT = "light"
 
+# Familles de polices : Segoe UI / Consolas n'existent pas sous Linux, où fontconfig
+# résout les alias génériques vers les polices du bureau (Consolas absente retomberait
+# sur une police proportionnelle, illisible pour le journal et la commande).
+if os.name == "nt":
+    FONT_UI, FONT_MONO = "Segoe UI", "Consolas"
+else:
+    FONT_UI, FONT_MONO = "sans-serif", "monospace"
+
 
 def system_prefers_dark():
-    try:
-        import winreg
-        key = r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key) as k:
-            value, _ = winreg.QueryValueEx(k, "AppsUseLightTheme")
-        return value == 0
-    except Exception:
-        return False
+    if os.name == "nt":
+        try:
+            import winreg
+            key = r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key) as k:
+                value, _ = winreg.QueryValueEx(k, "AppsUseLightTheme")
+            return value == 0
+        except Exception:
+            return False
+    return _linux_prefers_dark()
+
+
+def _linux_prefers_dark():
+    """Préférence sombre du bureau Linux : réglage GNOME (repris par la plupart des
+    bureaux GTK, et par KDE via sa synchronisation GTK), puis nom du thème GTK."""
+    for gkey in ("color-scheme", "gtk-theme"):
+        try:
+            out = subprocess.run(
+                ["gsettings", "get", "org.gnome.desktop.interface", gkey],
+                capture_output=True, text=True, timeout=3).stdout
+        except Exception:
+            return False
+        if "dark" in out.lower():
+            return True
+    return False
 
 
 def resolve(mode):
@@ -109,8 +135,10 @@ def flash_taskbar(window, count=5):
     """Fait clignoter l'icône de la barre des tâches (notification discrète de fin de file).
 
     N'agit que si la fenêtre n'a pas déjà le focus : inutile d'attirer l'attention
-    sur une fenêtre que l'utilisateur regarde déjà.
+    sur une fenêtre que l'utilisateur regarde déjà. Windows uniquement.
     """
+    if os.name != "nt":
+        return
     try:
         import ctypes
         from ctypes import wintypes
@@ -137,7 +165,10 @@ def flash_taskbar(window, count=5):
 
 
 def darken_titlebar(window, dark):
-    """Barre de titre sombre via DWM (Windows 10 1809+). Sans effet ailleurs."""
+    """Barre de titre sombre via DWM (Windows 10 1809+). Sans effet ailleurs
+    (sous Linux, la barre de titre est dessinée par le gestionnaire de fenêtres)."""
+    if os.name != "nt":
+        return
     try:
         window.update_idletasks()
         hwnd = ctypes.windll.user32.GetParent(window.winfo_id()) or window.winfo_id()

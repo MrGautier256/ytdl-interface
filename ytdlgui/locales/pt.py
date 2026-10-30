@@ -186,7 +186,7 @@ S = {
     "adv.concurrent.tip": "Número de vídeos transferidos ao mesmo tempo (1 a 4).",
     "adv.binaries": "Binários",
     "adv.ytdlppath": "Caminho do yt-dlp:",
-    "adv.ytdlppath.tip": "Vazio = usa o bin\\yt-dlp.exe fornecido com a aplicação,\nou o yt-dlp encontrado no PATH.",
+    "adv.ytdlppath.tip": "Vazio = usa o bin/yt-dlp fornecido com a aplicação,\nou o yt-dlp encontrado no PATH.",
     "adv.ffmpegpath": "Caminho do ffmpeg:",
     "adv.ffmpegpath.tip": "Vazio = deteção automática. O ffmpeg serve para fusões,\nconversões e incorporações.",
     "adv.update": "Atualizar o yt-dlp",

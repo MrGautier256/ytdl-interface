@@ -6,19 +6,29 @@ A full-featured graphical interface for [yt-dlp](https://github.com/yt-dlp/yt-dl
 
 ## Getting started
 
-**Ready-to-run build (recommended):** download the latest `YTDL-Interface.zip` from the [Releases](../../releases) page, extract it anywhere, and run `YTDL-Interface.exe` inside the extracted folder. No install, no prerequisites.
+**Ready-to-run build (recommended):** from the [Releases](../../releases) page, download the archive for your system, extract it anywhere, and run the executable inside the extracted folder. No install, no prerequisites.
+
+- **Windows:** `YTDL-Interface-windows.zip`, then run `YTDL-Interface.exe`.
+- **Linux (x86_64):** `YTDL-Interface-linux.tar.gz`, then:
+  ```bash
+  tar -xzf YTDL-Interface-linux.tar.gz
+  ./YTDL-Interface/YTDL-Interface
+  ```
+  Works on distributions with glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+, Linux Mint 21+...).
 
 > **Windows SmartScreen:** on first launch, Windows may show "Windows protected your PC". This just means the exe is new and unsigned, not yet flagged as trustworthy by SmartScreen's reputation system — it's not a malware detection. Click **More info**, then **Run anyway**.
 
-**From source:** double-click `main.pyw` (requires Python 3 with Tkinter, included by default on Windows).
+**From source:** requires Python 3 with Tkinter.
+- **Windows:** double-click `main.pyw` (Tkinter is included by default).
+- **Linux:** `python3 main.pyw` (Tkinter comes from the `python3-tk` package on Debian/Ubuntu, `python3-tkinter` on Fedora).
 
 Either way, if yt-dlp and/or ffmpeg are missing on the machine, the app detects it on startup and offers an install window with a per-component progress bar; installation runs in the background without closing the app. Also reachable any time from the Advanced tab ("Download yt-dlp" / "Install ffmpeg" / "Update yt-dlp"). Settings and binaries are stored inside that same folder (`settings.json`, `bin/`), next to the executable, not in a system directory — keep the whole folder together.
 
 ## Language and theme
 
 At the top of the window:
-- **Language**: 9 languages available (French, English, Spanish, German, Italian, Portuguese, Dutch, Polish, Russian). "Auto" follows the Windows UI language.
-- **Theme**: light or dark (modern Sun Valley skin, sv-ttk library bundled in `vendor/`). "Auto" follows the Windows theme, including the title bar.
+- **Language**: 9 languages available (French, English, Spanish, German, Italian, Portuguese, Dutch, Polish, Russian). "Auto" follows the system language (Windows UI language, or the `LANGUAGE` / `LANG` variables on Linux).
+- **Theme**: light or dark (modern Sun Valley skin, sv-ttk library bundled in `vendor/`). "Auto" follows the system theme: the Windows theme (title bar included), or on Linux the light/dark setting of GNOME and compatible desktops.
 
 ## Quick start
 

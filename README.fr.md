@@ -6,19 +6,29 @@ Interface graphique complète pour [yt-dlp](https://github.com/yt-dlp/yt-dlp), l
 
 ## Lancement
 
-**Version prête à l'emploi (recommandé) :** téléchargez le dernier `YTDL-Interface.zip` depuis la page [Releases](../../releases), extrayez-le où vous voulez, puis lancez `YTDL-Interface.exe` dans le dossier extrait. Aucune installation, aucun prérequis.
+**Version prête à l'emploi (recommandé) :** depuis la page [Releases](../../releases), téléchargez l'archive correspondant à votre système, extrayez-la où vous voulez, puis lancez l'exécutable dans le dossier extrait. Aucune installation, aucun prérequis.
+
+- **Windows :** `YTDL-Interface-windows.zip`, puis lancez `YTDL-Interface.exe`.
+- **Linux (x86_64) :** `YTDL-Interface-linux.tar.gz`, puis :
+  ```bash
+  tar -xzf YTDL-Interface-linux.tar.gz
+  ./YTDL-Interface/YTDL-Interface
+  ```
+  Fonctionne sur les distributions avec glibc 2.35 ou plus récente (Ubuntu 22.04+, Debian 12+, Fedora 36+, Linux Mint 21+...).
 
 > **SmartScreen de Windows :** au premier lancement, Windows peut afficher "Windows a protégé votre ordinateur". Ça signifie simplement que l'exe est récent et non signé, pas encore reconnu comme fiable par le système de réputation de SmartScreen : ce n'est pas une détection de virus. Cliquez sur **Informations complémentaires** puis **Exécuter quand même**.
 
-**Depuis les sources :** double-cliquer sur `main.pyw` (nécessite Python 3, avec Tkinter, inclus par défaut sur Windows).
+**Depuis les sources :** nécessite Python 3 avec Tkinter.
+- **Windows :** double-cliquer sur `main.pyw` (Tkinter est inclus par défaut).
+- **Linux :** `python3 main.pyw` (Tkinter s'installe avec le paquet `python3-tk` sur Debian/Ubuntu, `python3-tkinter` sur Fedora).
 
 Dans les deux cas, si yt-dlp et/ou ffmpeg sont absents de la machine, l'application le détecte au démarrage et propose une fenêtre d'installation avec barre de progression par composant ; l'installation se fait en arrière-plan, sans quitter l'app. Accessible aussi à tout moment depuis l'onglet Avancé ("Télécharger yt-dlp" / "Installer ffmpeg" / "Mettre à jour yt-dlp"). Les réglages et les binaires sont enregistrés dans ce même dossier (`settings.json`, `bin/`), à côté de l'exécutable, pas dans un dossier système : gardez le dossier entier ensemble.
 
 ## Langue et thème
 
 En haut de la fenêtre :
-- **Langue** : 9 langues disponibles (français, anglais, espagnol, allemand, italien, portugais, néerlandais, polonais, russe). "Auto" suit la langue de Windows.
-- **Thème** : clair ou sombre (habillage moderne Sun Valley, bibliothèque sv-ttk embarquée dans `vendor/`). "Auto" suit le thème de Windows, barre de titre comprise.
+- **Langue** : 9 langues disponibles (français, anglais, espagnol, allemand, italien, portugais, néerlandais, polonais, russe). "Auto" suit la langue du système (langue de Windows, ou variables `LANGUAGE` / `LANG` sous Linux).
+- **Thème** : clair ou sombre (habillage moderne Sun Valley, bibliothèque sv-ttk embarquée dans `vendor/`). "Auto" suit le thème du système : celui de Windows (barre de titre comprise), ou sous Linux le réglage clair/sombre de GNOME et des bureaux compatibles.
 
 ## Utilisation rapide
 

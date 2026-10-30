@@ -186,7 +186,7 @@ S = {
     "adv.concurrent.tip": "Liczba filmów pobieranych jednocześnie (1 do 4).",
     "adv.binaries": "Programy",
     "adv.ytdlppath": "Ścieżka yt-dlp:",
-    "adv.ytdlppath.tip": "Puste = używa dołączonego bin\\yt-dlp.exe\nlub yt-dlp znalezionego w PATH.",
+    "adv.ytdlppath.tip": "Puste = używa dołączonego bin/yt-dlp\nlub yt-dlp znalezionego w PATH.",
     "adv.ffmpegpath": "Ścieżka ffmpeg:",
     "adv.ffmpegpath.tip": "Puste = automatyczne wykrywanie. ffmpeg służy do łączenia,\nkonwersji i osadzania.",
     "adv.update": "Aktualizuj yt-dlp",

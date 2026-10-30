@@ -1,8 +1,11 @@
 # -*- mode: python ; coding: utf-8 -*-
-# Build : pyinstaller ytdl-interface.spec
-# Produit un dossier portable (dist/YTDL-Interface/) contenant YTDL-Interface.exe :
-# aucun installeur, settings.json et bin/ (yt-dlp, ffmpeg) sont créés à côté de l'exe,
-# dans ce même dossier, au premier lancement. Le dossier est zippé tel quel pour la release.
+# Build : pyinstaller ytdl-interface.spec (à lancer sur la plateforme cible : Windows
+# ou Linux, PyInstaller ne fait pas de compilation croisée).
+# Produit un dossier portable (dist/YTDL-Interface/) contenant l'exécutable
+# YTDL-Interface(.exe) : aucun installeur, settings.json et bin/ (yt-dlp, ffmpeg) sont
+# créés à côté de l'exécutable, dans ce même dossier, au premier lancement. Le dossier
+# est archivé tel quel pour la release (zip sous Windows, tar.gz sous Linux).
+import sys
 
 # ytdlgui.i18n charge ytdlgui.locales.<code> via importlib.import_module() avec un nom
 # construit dynamiquement : l'analyse statique de PyInstaller ne le détecte pas, d'où
@@ -52,7 +55,9 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='assets/icon.ico',
+    # Icône de l'exécutable : Windows uniquement (PyInstaller l'ignore sous Linux, où
+    # l'icône de fenêtre est posée au runtime depuis assets/icon.png, cf. ytdlgui/app.py).
+    icon='assets/icon.ico' if sys.platform == 'win32' else None,
 )
 
 coll = COLLECT(

@@ -186,7 +186,7 @@ S = {
     "adv.concurrent.tip": "Nombre de vidéos téléchargées en même temps (1 à 4).",
     "adv.binaries": "Binaires",
     "adv.ytdlppath": "Chemin de yt-dlp :",
-    "adv.ytdlppath.tip": "Vide = utilise bin\\yt-dlp.exe fourni avec l'application,\nou yt-dlp trouvé dans le PATH.",
+    "adv.ytdlppath.tip": "Vide = utilise bin/yt-dlp fourni avec l'application,\nou yt-dlp trouvé dans le PATH.",
     "adv.ffmpegpath": "Chemin de ffmpeg :",
     "adv.ffmpegpath.tip": "Vide = détection automatique. ffmpeg sert aux fusions,\nconversions et incrustations.",
     "adv.update": "Mettre à jour yt-dlp",

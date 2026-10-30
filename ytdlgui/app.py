@@ -17,7 +17,7 @@ from . import i18n
 from . import theme
 from .binaries import (
     CREATE_NO_WINDOW, app_dir, download_ffmpeg, download_ytdlp, find_ffmpeg, find_ytdlp,
-    get_version, resource_path,
+    format_command, get_version, open_folder, resource_path,
 )
 from .config import load_settings, save_settings
 from .i18n import T
@@ -53,7 +53,14 @@ class App(tk.Tk):
         self.app_dir = app_dir()
         self.settings = load_settings(self.app_dir)
         try:
-            self.iconbitmap(default=resource_path("assets", "icon.ico"))
+            if os.name == "nt":
+                self.iconbitmap(default=resource_path("assets", "icon.ico"))
+            else:
+                # Tk sous Linux ne lit pas les .ico : PNG via iconphoto (True = aussi
+                # icône par défaut des fenêtres secondaires). Référence gardée sur
+                # self, sinon l'image est libérée par le ramasse-miettes.
+                self._icon = tk.PhotoImage(file=resource_path("assets", "icon.png"))
+                self.iconphoto(True, self._icon)
         except Exception:
             pass
         self.minsize(900, 640)
@@ -76,6 +83,8 @@ class App(tk.Tk):
         self.title(T("app.title"))
 
         self._build_ui()
+        if "_geometry" not in self.settings:
+            self._fit_tabs_width()
         self._register_traces()
         self._resolve_binaries(startup=True)
         self._update_preview()
@@ -102,6 +111,19 @@ class App(tk.Tk):
         if x + w < vx + margin or x > vx + vw - margin or y + h < vy + margin or y > vy + vh - margin:
             return default
         return geo
+
+    def _fit_tabs_width(self):
+        """Premier lancement : élargit la fenêtre par défaut si les libellés des onglets
+        n'y tiennent pas (ttk les tronquerait). Leur largeur dépend de la langue et de
+        la police : les polices Linux courantes sont plus larges que Segoe UI."""
+        try:
+            self.update_idletasks()
+            need = self.nb.winfo_reqwidth() + 16       # + padx=8 de chaque côté
+            width = min(need, self.winfo_screenwidth() - 40)
+            if self.winfo_width() > 1 and width > self.winfo_width():
+                self.geometry("%dx%d" % (width, self.winfo_height()))
+        except tk.TclError:
+            pass
 
     # ------------------------------------------------------------------ vars
     def _create_vars(self):
@@ -216,8 +238,8 @@ class App(tk.Tk):
     # ------------------------------------------------------------------ UI
     def _build_ui(self):
         style = ttk.Style(self)
-        style.configure("Accent.TButton", font=("Segoe UI", 10, "bold"))
-        style.configure("AppTitle.TLabel", font=("Segoe UI", 13, "bold"))
+        style.configure("Accent.TButton", font=(theme.FONT_UI, 10, "bold"))
+        style.configure("AppTitle.TLabel", font=(theme.FONT_UI, 13, "bold"))
 
         self._build_topbar()
 
@@ -408,7 +430,7 @@ class App(tk.Tk):
     def _build_tab_download(self, parent):
         top = ttk.LabelFrame(parent, text=T("dl.links"), padding=4)
         top.pack(fill="x", padx=8, pady=(8, 2))
-        self.url_text = self._make_text(top, height=3, font=("Segoe UI", 10), undo=True)
+        self.url_text = self._make_text(top, height=3, font=(theme.FONT_UI, 10), undo=True)
         self.url_text.pack(fill="x", padx=4, pady=2)
         Tooltip(self.url_text, T("dl.links.tip"))
         btns = ttk.Frame(top)
@@ -618,7 +640,7 @@ class App(tk.Tk):
         self._row(s3, T("adv.custom"), "custom_args", tip=T("adv.custom.tip"))
 
         s4 = self._section(parent, T("adv.cmd"), help_text=T("adv.cmd.help"))
-        self.preview_text = self._make_text(s4, height=5, wrap="word", font=("Consolas", 9),
+        self.preview_text = self._make_text(s4, height=5, wrap="word", font=(theme.FONT_MONO, 9),
                                             state="disabled",
                                             background=theme.PAL["preview_bg"])
         self.preview_text.pack(fill="x", padx=6, pady=2)
@@ -632,7 +654,7 @@ class App(tk.Tk):
         ttk.Checkbutton(bar, text=T("log.autoscroll"), variable=self.v["autoscroll_log"]).pack(side="left", padx=12)
         frame = ttk.Frame(parent)
         frame.pack(fill="both", expand=True, padx=8, pady=(2, 8))
-        self.log_text = self._make_text(frame, wrap="none", font=("Consolas", 9), state="disabled")
+        self.log_text = self._make_text(frame, wrap="none", font=(theme.FONT_MONO, 9), state="disabled")
         vsb = ttk.Scrollbar(frame, orient="vertical", command=self.log_text.yview)
         hsb = ttk.Scrollbar(frame, orient="horizontal", command=self.log_text.xview)
         self.log_text.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
@@ -798,7 +820,7 @@ class App(tk.Tk):
     def _open_dest(self):
         dest = self.v["dest_dir"].get().strip()
         if dest and os.path.isdir(dest):
-            os.startfile(dest)
+            open_folder(dest)
         else:
             messagebox.showinfo("YTDL Interface", T("msg.nodestdir"), parent=self)
 
@@ -839,7 +861,7 @@ class App(tk.Tk):
         cfg = self.collect_cfg()
         try:
             cmd = cmdmod.build_command(cfg, "<URL>", ytdlp or "yt-dlp", ffmpeg)
-            text = subprocess.list2cmdline(cmd)
+            text = format_command(cmd)
         except Exception as exc:
             text = "%s %s" % (T("msg.cmderror"), exc)
         try:
@@ -899,7 +921,7 @@ class App(tk.Tk):
 
         body = ttk.Frame(win, padding=16)
         body.pack(fill="both", expand=True)
-        ttk.Label(body, text=T("inst.needed_intro"), font=("Segoe UI", 10, "bold")).pack(anchor="w", pady=(0, 10))
+        ttk.Label(body, text=T("inst.needed_intro"), font=(theme.FONT_UI, 10, "bold")).pack(anchor="w", pady=(0, 10))
 
         descs = {"ytdlp": T("inst.ytdlp_desc"), "ffmpeg": T("inst.ffmpeg_desc")}
         names = {"ytdlp": "yt-dlp", "ffmpeg": "ffmpeg"}
@@ -909,7 +931,7 @@ class App(tk.Tk):
             row.pack(fill="x", pady=6)
             top = ttk.Frame(row)
             top.pack(fill="x")
-            ttk.Label(top, text=names[comp], font=("Segoe UI", 10, "bold")).pack(side="left")
+            ttk.Label(top, text=names[comp], font=(theme.FONT_UI, 10, "bold")).pack(side="left")
             status_var = tk.StringVar(value=T("inst.status_waiting"))
             ttk.Label(top, textvariable=status_var, foreground=theme.PAL["muted"]).pack(side="right")
             ttk.Label(row, text=descs[comp], foreground=theme.PAL["muted"]).pack(anchor="w")
@@ -1086,7 +1108,7 @@ class App(tk.Tk):
         win.geometry("960x660")
         win.transient(self)
         theme.style_toplevel(win)
-        wait = ttk.Label(win, text=T("an.wait"), font=("Segoe UI", 11))
+        wait = ttk.Label(win, text=T("an.wait"), font=(theme.FONT_UI, 11))
         wait.pack(pady=40)
 
         def worker():
@@ -1121,7 +1143,7 @@ class App(tk.Tk):
         for child in win.winfo_children():
             child.destroy()
         if info is None:
-            ttk.Label(win, text=T("an.failed"), font=("Segoe UI", 11, "bold")).pack(anchor="w", padx=12, pady=(12, 4))
+            ttk.Label(win, text=T("an.failed"), font=(theme.FONT_UI, 11, "bold")).pack(anchor="w", padx=12, pady=(12, 4))
             txt = self._make_text(win, wrap="word", height=12)
             txt.insert("1.0", err)
             txt.configure(state="disabled")
@@ -1138,7 +1160,7 @@ class App(tk.Tk):
         head.pack(fill="x")
         entries = info.get("entries") or []
         ttk.Label(head, text=info.get("title") or T("an.playlist"),
-                  font=("Segoe UI", 12, "bold")).pack(anchor="w")
+                  font=(theme.FONT_UI, 12, "bold")).pack(anchor="w")
         ttk.Label(head, text=T("an.items").format(
             n=len(entries), u=info.get("uploader") or info.get("channel") or "?")).pack(anchor="w")
         cols = ("n", "title", "dur")
@@ -1166,7 +1188,7 @@ class App(tk.Tk):
         self._thumb_label.pack(side="left", padx=(0, 12))
         meta = ttk.Frame(head)
         meta.pack(side="left", fill="x", expand=True)
-        ttk.Label(meta, text=info.get("title") or "?", font=("Segoe UI", 12, "bold"),
+        ttk.Label(meta, text=info.get("title") or "?", font=(theme.FONT_UI, 12, "bold"),
                   wraplength=620, justify="left").pack(anchor="w")
         details = []
         if info.get("uploader") or info.get("channel"):

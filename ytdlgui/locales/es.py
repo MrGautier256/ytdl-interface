@@ -186,7 +186,7 @@ S = {
     "adv.concurrent.tip": "Número de vídeos descargados a la vez (1 a 4).",
     "adv.binaries": "Binarios",
     "adv.ytdlppath": "Ruta de yt-dlp:",
-    "adv.ytdlppath.tip": "Vacío = usa bin\\yt-dlp.exe incluido con la aplicación,\no yt-dlp encontrado en el PATH.",
+    "adv.ytdlppath.tip": "Vacío = usa bin/yt-dlp incluido con la aplicación,\no yt-dlp encontrado en el PATH.",
     "adv.ffmpegpath": "Ruta de ffmpeg:",
     "adv.ffmpegpath.tip": "Vacío = detección automática. ffmpeg sirve para fusiones,\nconversiones e incrustaciones.",
     "adv.update": "Actualizar yt-dlp",

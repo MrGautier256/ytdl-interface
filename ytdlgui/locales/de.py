@@ -186,7 +186,7 @@ S = {
     "adv.concurrent.tip": "Anzahl gleichzeitig heruntergeladener Videos (1 bis 4).",
     "adv.binaries": "Programme",
     "adv.ytdlppath": "Pfad zu yt-dlp:",
-    "adv.ytdlppath.tip": "Leer = nutzt das mitgelieferte bin\\yt-dlp.exe\noder yt-dlp aus dem PATH.",
+    "adv.ytdlppath.tip": "Leer = nutzt das mitgelieferte bin/yt-dlp\noder yt-dlp aus dem PATH.",
     "adv.ffmpegpath": "Pfad zu ffmpeg:",
     "adv.ffmpegpath.tip": "Leer = automatische Erkennung. ffmpeg dient zum Zusammenfügen,\nUmwandeln und Einbetten.",
     "adv.update": "yt-dlp aktualisieren",
