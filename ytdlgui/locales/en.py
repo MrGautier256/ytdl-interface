@@ -186,7 +186,7 @@ S = {
     "adv.concurrent.tip": "Number of videos downloaded at the same time (1 to 4).",
     "adv.binaries": "Binaries",
     "adv.ytdlppath": "yt-dlp path:",
-    "adv.ytdlppath.tip": "Empty = uses bin\\yt-dlp.exe shipped with the app,\nor yt-dlp found in PATH.",
+    "adv.ytdlppath.tip": "Empty = uses bin/yt-dlp shipped with the app,\nor yt-dlp found in PATH.",
     "adv.ffmpegpath": "ffmpeg path:",
     "adv.ffmpegpath.tip": "Empty = automatic detection. ffmpeg is used for merging,\nconversions and embedding.",
     "adv.update": "Update yt-dlp",

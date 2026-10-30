@@ -11,7 +11,19 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            archive: YTDL-Interface-windows.zip
+          # Le binaire Linux exige une glibc au moins aussi récente que celle de la
+          # machine de build : on compile sur la plus ancienne Ubuntu disponible pour
+          # rester compatible avec un maximum de distributions (glibc 2.35+).
+          - os: ubuntu-22.04
+            platform: linux
+            archive: YTDL-Interface-linux.tar.gz
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,24 +33,73 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Bibliothèques Tcl/Tk partagées que PyInstaller embarque dans le build Linux
+      - name: Install Tk (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libtk8.6
+          python -c "import tkinter; print('Tk', tkinter.TkVersion)"
+
       - name: Install PyInstaller
         run: pip install pyinstaller
 
-      - name: Build exe
+      - name: Build
         run: pyinstaller --noconfirm --clean ytdl-interface.spec
 
-      - name: Zip the release folder
-        run: Compress-Archive -Path dist/YTDL-Interface -DestinationPath dist/YTDL-Interface.zip
+      - name: Zip the release folder (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path dist/YTDL-Interface -DestinationPath dist/${{ matrix.archive }}
+
+      # tar.gz plutôt que zip : conserve le droit d'exécution du binaire
+      - name: Tar the release folder (Linux)
+        if: runner.os == 'Linux'
+        run: tar -czf dist/${{ matrix.archive }} -C dist YTDL-Interface
+
+      # Lance l'exécutable packagé quelques secondes sur un écran virtuel : un module
+      # oublié par PyInstaller ferait planter le démarrage (error.log créé) au lieu de
+      # laisser l'interface tourner jusqu'au timeout (code 124). Sur une copie, pour ne
+      # pas mettre dans l'archive les fichiers que l'app crée au lancement (bin/...).
+      - name: Smoke test (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          cp -r dist/YTDL-Interface "$RUNNER_TEMP/smoke"
+          rc=0
+          xvfb-run -a timeout 15 "$RUNNER_TEMP/smoke/YTDL-Interface" || rc=$?
+          if [ -f "$RUNNER_TEMP/smoke/error.log" ]; then
+            cat "$RUNNER_TEMP/smoke/error.log"
+            exit 1
+          fi
+          if [ "$rc" -ne 124 ]; then
+            echo "L'application s'est arrêtée prématurément (code $rc)."
+            exit 1
+          fi
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: YTDL-Interface-windows
-          path: dist/YTDL-Interface.zip
+          name: YTDL-Interface-${{ matrix.platform }}
+          path: dist/${{ matrix.archive }}
+          if-no-files-found: error
+
+  # Une seule release créée une fois les deux builds réussis (deux jobs qui
+  # publieraient chacun de leur côté risqueraient de créer la release en double).
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
 
       - name: Create GitHub release
-        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/YTDL-Interface.zip
+          files: |
+            dist/YTDL-Interface-windows.zip
+            dist/YTDL-Interface-linux.tar.gz
+          fail_on_unmatched_files: true
           generate_release_notes: true

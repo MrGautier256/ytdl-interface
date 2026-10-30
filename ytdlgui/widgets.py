@@ -43,7 +43,7 @@ class Tooltip:
                 self._tip, text=self.text, justify="left",
                 background=theme.PAL["tip_bg"], foreground=theme.PAL["tip_fg"],
                 relief="solid", borderwidth=1, wraplength=380,
-                font=("Segoe UI", 9), padx=6, pady=4,
+                font=(theme.FONT_UI, 9), padx=6, pady=4,
             )
             lbl.pack()
         except Exception:
@@ -83,16 +83,28 @@ class ScrollableFrame(ttk.Frame):
     def _on_canvas_configure(self, event):
         self._canvas.itemconfigure(self._win, width=event.width)
 
+    # Linux (X11, Tk 8.6) : la molette arrive en clics Button-4 (haut) / Button-5 (bas)
+    # et non en événements <MouseWheel>.
+    _WHEEL_EVENTS = ("<MouseWheel>", "<Button-4>", "<Button-5>")
+
     def _bind_wheel(self, _event=None):
-        self._canvas.bind_all("<MouseWheel>", self._on_wheel)
+        for seq in self._WHEEL_EVENTS:
+            self._canvas.bind_all(seq, self._on_wheel)
 
     def _unbind_wheel(self, _event=None):
-        self._canvas.unbind_all("<MouseWheel>")
+        for seq in self._WHEEL_EVENTS:
+            self._canvas.unbind_all(seq)
 
     def _on_wheel(self, event):
+        if event.num == 4:
+            step = -1
+        elif event.num == 5:
+            step = 1
+        else:
+            step = int(-event.delta / 120)
         try:
             if self._canvas.bbox("all")[3] > self._canvas.winfo_height():
-                self._canvas.yview_scroll(int(-event.delta / 120), "units")
+                self._canvas.yview_scroll(step, "units")
         except Exception:
             pass
 

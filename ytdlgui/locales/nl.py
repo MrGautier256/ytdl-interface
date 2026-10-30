@@ -186,7 +186,7 @@ S = {
     "adv.concurrent.tip": "Aantal video's dat tegelijk wordt gedownload (1 tot 4).",
     "adv.binaries": "Programma's",
     "adv.ytdlppath": "Pad naar yt-dlp:",
-    "adv.ytdlppath.tip": "Leeg = gebruikt de meegeleverde bin\\yt-dlp.exe,\nof yt-dlp gevonden in PATH.",
+    "adv.ytdlppath.tip": "Leeg = gebruikt de meegeleverde bin/yt-dlp,\nof yt-dlp gevonden in PATH.",
     "adv.ffmpegpath": "Pad naar ffmpeg:",
     "adv.ffmpegpath.tip": "Leeg = automatische detectie. ffmpeg dient voor samenvoegen,\nconverteren en insluiten.",
     "adv.update": "yt-dlp bijwerken",

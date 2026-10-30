@@ -186,7 +186,7 @@ S = {
     "adv.concurrent.tip": "Число видео, скачиваемых одновременно (от 1 до 4).",
     "adv.binaries": "Программы",
     "adv.ytdlppath": "Путь к yt-dlp:",
-    "adv.ytdlppath.tip": "Пусто = используется bin\\yt-dlp.exe из комплекта приложения\nили yt-dlp, найденный в PATH.",
+    "adv.ytdlppath.tip": "Пусто = используется bin/yt-dlp из комплекта приложения\nили yt-dlp, найденный в PATH.",
     "adv.ffmpegpath": "Путь к ffmpeg:",
     "adv.ffmpegpath.tip": "Пусто = автоопределение. ffmpeg нужен для слияния,\nконвертации и встраивания.",
     "adv.update": "Обновить yt-dlp",

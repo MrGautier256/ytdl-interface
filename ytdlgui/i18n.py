@@ -1,6 +1,7 @@
 """Internationalisation : langues disponibles, détection système, T(clé)."""
 import importlib
 import locale
+import os
 
 # (code, nom natif) ; "auto" est ajouté en tête par l'interface
 LANGS = [
@@ -31,18 +32,27 @@ def _load(lang):
 
 
 def system_lang():
-    """Code langue de l'interface Windows (fr, en...), 'en' par défaut."""
-    try:
-        import ctypes
-        lcid = ctypes.windll.kernel32.GetUserDefaultUILanguage()
-        code = locale.windows_locale.get(lcid, "en")
-        return code.split("_")[0].lower()
-    except Exception:
+    """Code langue de l'interface système (fr, en...), 'en' par défaut."""
+    if os.name == "nt":
         try:
-            code = (locale.getlocale()[0] or "en")
+            import ctypes
+            lcid = ctypes.windll.kernel32.GetUserDefaultUILanguage()
+            code = locale.windows_locale.get(lcid, "en")
             return code.split("_")[0].lower()
         except Exception:
-            return "en"
+            pass
+    else:
+        # Linux : mêmes variables et même priorité que gettext (LANGUAGE peut
+        # contenir une liste "fr:en"). "C" / "POSIX" = pas de préférence exprimée.
+        for var in ("LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG"):
+            value = os.environ.get(var, "").split(":")[0].strip()
+            if value and value not in ("C", "POSIX") and not value.startswith("C."):
+                return value.split("_")[0].split(".")[0].lower()
+    try:
+        code = (locale.getlocale()[0] or "en")
+        return code.split("_")[0].lower()
+    except Exception:
+        return "en"
 
 
 def set_lang(code):

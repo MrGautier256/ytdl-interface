@@ -1,10 +1,11 @@
 """File de téléchargement : exécution de yt-dlp et suivi de progression."""
 import os
 import re
+import signal
 import subprocess
 import threading
 
-from .binaries import CREATE_NO_WINDOW
+from .binaries import CREATE_NO_WINDOW, IS_WINDOWS
 
 # Codes internes ; la traduction pour l'affichage se fait dans app.py (st.*)
 ST_PENDING = "pending"
@@ -109,6 +110,9 @@ class Engine:
                 stdin=subprocess.DEVNULL,
                 text=True, encoding="utf-8", errors="replace",
                 creationflags=CREATE_NO_WINDOW,
+                # Linux : groupe de processus dédié, pour que l'annulation tue aussi
+                # les ffmpeg lancés par yt-dlp (équivalent du /T de taskkill).
+                start_new_session=not IS_WINDOWS,
             )
         except Exception as exc:
             job.status = ST_ERROR
@@ -177,10 +181,13 @@ class Engine:
             proc = job.proc
         if proc and proc.poll() is None:
             try:
-                subprocess.run(
-                    ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
-                    capture_output=True, creationflags=CREATE_NO_WINDOW,
-                )
+                if IS_WINDOWS:
+                    subprocess.run(
+                        ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                        capture_output=True, creationflags=CREATE_NO_WINDOW,
+                    )
+                else:
+                    os.killpg(proc.pid, signal.SIGKILL)
             except Exception:
                 pass
 
