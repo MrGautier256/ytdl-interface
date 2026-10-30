@@ -1,16 +1,66 @@
 name: Build and release
 
+# Deux façons de publier une release (tag vX.Y.Z + archives Windows et Linux) :
+# - pousser un tag : git tag v1.2.0 && git push origin v1.2.0
+# - onglet Actions > Build and release > Run workflow, en saisissant la version
+#   (ex : 1.2.0) : le tag v1.2.0 est alors créé sur le commit compilé.
+# Run workflow sans version = builds de test uniquement (artefacts, pas de release).
 on:
   push:
     tags:
       - "v*.*.*"
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version à publier, ex : 1.2.0 (vide = builds de test, sans release)"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: write
 
 jobs:
+  # Détermine la version (nom du tag poussé, ou champ saisi) et la valide avant de
+  # lancer les builds, pour échouer tout de suite sur une faute de frappe.
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.version.outputs.release }}
+    steps:
+      - name: Determine version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            version="$GITHUB_REF_NAME"
+          else
+            version="$(echo "$INPUT_VERSION" | tr -d '[:space:]')"
+          fi
+          version="${version#v}"
+          if [ -z "$version" ]; then
+            echo "Aucune version : builds de test, pas de release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version invalide « $version » : format attendu X.Y.Z (ex : 1.2.0)."
+            exit 1
+          fi
+          # Lancement manuel : ne jamais écraser une release existante
+          if [ "$GITHUB_REF_TYPE" != "tag" ] && gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v$version" --silent 2>/dev/null; then
+            echo "::error::Le tag v$version existe déjà : choisis un autre numéro de version."
+            exit 1
+          fi
+          echo "Version : $version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "release=true" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: prepare
     strategy:
       matrix:
         include:
@@ -27,6 +77,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # Le numéro affiché dans l'app vient de ytdlgui/__init__.py : on y écrit la
+      # version de la release, pour qu'il corresponde toujours au tag publié.
+      - name: Set app version
+        if: needs.prepare.outputs.version != ''
+        shell: bash
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          sed -i "s/^__version__ = .*/__version__ = \"$VERSION\"/" ytdlgui/__init__.py
+          grep "__version__ = \"$VERSION\"" ytdlgui/__init__.py
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -85,8 +146,8 @@ jobs:
   # Une seule release créée une fois les deux builds réussis (deux jobs qui
   # publieraient chacun de leur côté risqueraient de créer la release en double).
   release:
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [prepare, build]
+    if: needs.prepare.outputs.release == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Download build artifacts
@@ -95,9 +156,15 @@ jobs:
           path: dist
           merge-multiple: true
 
+      # Si le tag n'existe pas encore (lancement manuel), il est créé ici sur le
+      # commit compilé. Un tag créé avec le jeton du workflow ne relance pas ce
+      # workflow : pas de double build.
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ needs.prepare.outputs.version }}
+          name: v${{ needs.prepare.outputs.version }}
+          target_commitish: ${{ github.sha }}
           files: |
             dist/YTDL-Interface-windows.zip
             dist/YTDL-Interface-linux.tar.gz
